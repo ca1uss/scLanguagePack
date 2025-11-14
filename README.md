@@ -52,6 +52,8 @@ Want to create your own custom language pack? Use the **[SC Global.ini Extractor
 
 This tool was created to make building this language pack easier, and it's now available for the community to create their own custom packs.
 
+**Note:** The extraction tool is currently in beta. If you encounter any issues with it, please report them in the [tool's issue tracker](https://github.com/BeltaKoda/SC-GlobalIni-Extractor/issues).
+
 ## 🚧 Found an Error or Issue?
 
 If you notice any incorrectly formatted component names, missing conversions, or other issues, please let us know!
