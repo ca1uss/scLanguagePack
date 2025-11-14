@@ -46,6 +46,12 @@ This makes it easier to quickly scan and sort components by their stats at a gla
 
 **Note for manual downloads:** If you download files directly from the repository instead of using a release ZIP, **only copy the `data` folder and `user.cfg` file**. Do not include the `.claude` folder - it's only used for project maintenance and future updates.
 
+## 🛠️ Create Your Own Language Pack
+
+Want to create your own custom language pack? Use the **[SC Global.ini Extractor](https://github.com/BeltaKoda/SC-GlobalIni-Extractor)** to extract the vanilla `global.ini` file from Star Citizen, then modify it to your preferences!
+
+This tool was created to make building this language pack easier, and it's now available for the community to create their own custom packs.
+
 ## 🚧 Found an Error or Issue?
 
 If you notice any incorrectly formatted component names, missing conversions, or other issues, please let us know!
