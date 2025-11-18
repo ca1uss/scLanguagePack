@@ -1,0 +1,118 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Game version (e.g., 4.4.0)'
+        required: true
+        type: string
+      environment:
+        description: 'Environment (LIVE, PTU, HOTFIX)'
+        required: true
+        type: choice
+        options:
+          - LIVE
+          - PTU
+          - HOTFIX
+      release_notes:
+        description: 'Release notes (optional)'
+        required: false
+        type: string
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify version directory exists
+        run: |
+          if [ ! -d "${{ inputs.version }}/${{ inputs.environment }}" ]; then
+            echo "Error: Directory ${{ inputs.version }}/${{ inputs.environment }} does not exist"
+            exit 1
+          fi
+
+      - name: Create release ZIP
+        run: |
+          cd ${{ inputs.version }}/${{ inputs.environment }}
+          zip -r ../../ScCompLangPackRemix-${{ inputs.version }}-${{ inputs.environment }}.zip data user.cfg
+          cd ../..
+
+      - name: Verify ZIP contents
+        run: |
+          echo "ZIP contents:"
+          unzip -l ScCompLangPackRemix-${{ inputs.version }}-${{ inputs.environment }}.zip
+
+      - name: Create version tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -f ${{ inputs.version }} -m "Version ${{ inputs.version }}"
+          git push -f origin ${{ inputs.version }}
+
+      - name: Create environment tag
+        run: |
+          git tag -f ${{ inputs.environment }} -m "${{ inputs.environment }} environment"
+          git push -f origin ${{ inputs.environment }}
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          if [ -n "${{ inputs.release_notes }}" ]; then
+            NOTES="${{ inputs.release_notes }}"
+          else
+            NOTES="# ScCompLangPackRemix ${{ inputs.version }} - ${{ inputs.environment }}
+
+          Component Language Pack Remix for Star Citizen patch ${{ inputs.version }} (${{ inputs.environment }} environment).
+
+          ## Installation
+
+          1. Download \`ScCompLangPackRemix-${{ inputs.version }}-${{ inputs.environment }}.zip\`
+          2. Extract the ZIP file
+          3. Copy the \`data\` folder and \`user.cfg\` file to your Star Citizen ${{ inputs.environment }} folder root
+          4. Launch the game
+
+          **${{ inputs.environment }} folder location:** \`Program Files/Roberts Space Industries/StarCitizen/${{ inputs.environment }}/\`
+
+          ## What's New
+
+          - Updated for Star Citizen patch ${{ inputs.version }}
+          - Preserved existing remixed component names
+          - Added new components from this patch
+
+          ---
+
+          🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+          💙 Credits to [ExoAE](https://github.com/ExoAE) for the original Component Language Pack"
+          fi
+
+          # Save to file for release creation
+          echo "$NOTES" > release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ inputs.version }}
+          name: "${{ inputs.version }} - ${{ inputs.environment }}"
+          body_path: release_notes.md
+          files: ScCompLangPackRemix-${{ inputs.version }}-${{ inputs.environment }}.zip
+          draft: false
+          prerelease: ${{ inputs.environment != 'LIVE' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "## ✅ Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tags Created:**" >> $GITHUB_STEP_SUMMARY
+          echo "- \`${{ inputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`${{ inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Release ZIP:** ScCompLangPackRemix-${{ inputs.version }}-${{ inputs.environment }}.zip" >> $GITHUB_STEP_SUMMARY
