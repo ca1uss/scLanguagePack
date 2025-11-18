@@ -6,13 +6,12 @@
 
 ## 💡 Why Did I Make This?
 
-> [!TIP]
+> [!NOTE]
 > **Quick-scan ship components without the guesswork!**
 >
 > When you scan a ship, you want to know **immediately** if it has components worth looting - without having to:
 > - Spend time retrieving the ship
 > - Look up component names online
-> - Wonder if that component is Military A-grade or Civilian D-grade
 >
 > This remix puts the critical stats **first**, so you can make instant decisions while scanning. See `M2A` at the start? You know it's Military, Size 2, A-grade. Decision made. Move on or loot up!
 
