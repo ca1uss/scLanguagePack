@@ -46,17 +46,13 @@ jobs:
           echo "ZIP contents:"
           unzip -l ScCompLangPackRemix-${{ inputs.version }}-${{ inputs.environment }}.zip
 
-      - name: Create version tag
+      - name: Create release tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -f ${{ inputs.version }} -m "Version ${{ inputs.version }}"
-          git push -f origin ${{ inputs.version }}
-
-      - name: Create environment tag
-        run: |
-          git tag -f ${{ inputs.environment }} -m "${{ inputs.environment }} environment"
-          git push -f origin ${{ inputs.environment }}
+          TAG_NAME="${{ inputs.version }}-${{ inputs.environment }}"
+          git tag -f "$TAG_NAME" -m "Release $TAG_NAME"
+          git push -f origin "$TAG_NAME"
 
       - name: Generate release notes
         id: release_notes
@@ -96,8 +92,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ inputs.version }}
-          name: "${{ inputs.version }} - ${{ inputs.environment }}"
+          tag_name: ${{ inputs.version }}-${{ inputs.environment }}
+          name: "${{ inputs.version }}-${{ inputs.environment }}"
           body_path: release_notes.md
           files: ScCompLangPackRemix-${{ inputs.version }}-${{ inputs.environment }}.zip
           draft: false
@@ -109,10 +105,8 @@ jobs:
         run: |
           echo "## ✅ Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Release Tag:** \`${{ inputs.version }}-${{ inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** ${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Tags Created:**" >> $GITHUB_STEP_SUMMARY
-          echo "- \`${{ inputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`${{ inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Release ZIP:** ScCompLangPackRemix-${{ inputs.version }}-${{ inputs.environment }}.zip" >> $GITHUB_STEP_SUMMARY
