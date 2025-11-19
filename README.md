@@ -75,10 +75,7 @@ For reference and transparency, **stock (unmodified) `global.ini` files are incl
 - `/4.3.2/LIVE/stock-global.ini` (if available)
 - `/4.4.0/PTU/stock-global.ini`
 
-These stock files were extracted using the **[SC Global.ini Extractor](https://github.com/BeltaKoda/SC-GlobalIni-Extractor)** tool and serve as:
-- Reference for what was changed in the remix
-- Starting point for creating your own custom modifications
-- Backup of the original game files for each patch
+These stock files were extracted using the **[SC Global.ini Extractor](https://github.com/BeltaKoda/SC-GlobalIni-Extractor)** tool. The extractor is compiled via GitHub Actions and includes everything it needs without requiring additional installation.
 
 ## 🚧 Found an Error or Issue?
 
