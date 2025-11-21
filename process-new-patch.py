@@ -4,28 +4,55 @@ Process new Star Citizen patch global.ini file.
 Preserves existing remix formatting and keeps new entries in stock format.
 """
 
+import argparse
+import sys
 from pathlib import Path
 from typing import Dict
 
 def read_ini_file(file_path: Path) -> Dict[str, str]:
     """Read an ini file and return a dict of key=value pairs."""
     entries = {}
-    with open(file_path, 'r', encoding='utf-8-sig', errors='replace') as f:
-        for line in f:
-            line = line.strip()
-            if '=' in line and not line.startswith(';'):
-                key, value = line.split('=', 1)
-                entries[key] = value
+    try:
+        with open(file_path, 'r', encoding='utf-8-sig', errors='replace') as f:
+            for line in f:
+                line = line.strip()
+                if '=' in line and not line.startswith(';'):
+                    key, value = line.split('=', 1)
+                    entries[key] = value
+    except FileNotFoundError:
+        print(f"Error: File not found: {file_path}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error reading {file_path}: {e}")
+        sys.exit(1)
     return entries
 
 def main():
-    # Paths
-    current_remix_path = Path('4.3.2/LIVE/data/Localization/english/global.ini')
-    new_stock_path = Path('/mnt/c/SCExtractor/StockGlobal-4-4-0-PTU.ini')
-    output_dir = Path('4.4.0/PTU/data/Localization/english')
-    output_path = output_dir / 'global.ini'
+    parser = argparse.ArgumentParser(description='Merge Star Citizen global.ini files.')
+    parser.add_argument('--old-remix', type=Path, default=Path('4.3.2/LIVE/data/Localization/english/global.ini'),
+                        help='Path to the previous version remixed global.ini')
+    parser.add_argument('--new-stock', type=Path, default=Path('4.4.0/PTU/stock-global.ini'),
+                        help='Path to the new version stock global.ini')
+    parser.add_argument('--output', type=Path, default=Path('4.4.0/PTU/data/Localization/english/global.ini'),
+                        help='Path to save the merged global.ini')
 
-    print("Reading current remixed ini...")
+    args = parser.parse_args()
+
+    current_remix_path = args.old_remix
+    new_stock_path = args.new_stock
+    output_path = args.output
+    output_dir = output_path.parent
+
+    print(f"Old Remix: {current_remix_path}")
+    print(f"New Stock: {new_stock_path}")
+    print(f"Output:    {output_path}")
+
+    if not current_remix_path.exists():
+        print(f"Warning: Old remix file not found at {current_remix_path}")
+    if not new_stock_path.exists():
+        print(f"Warning: New stock file not found at {new_stock_path}")
+
+    print("\nReading current remixed ini...")
     current_remix = read_ini_file(current_remix_path)
     print(f"  Loaded {len(current_remix)} entries")
 
@@ -39,8 +66,17 @@ def main():
     kept_remix_count = 0
     new_entry_count = 0
 
+    # Keys to always take from new stock (do not preserve old remix value)
+    force_new_keys = {
+        'Frontend_PU_Version'
+    }
+
     for key, stock_value in new_stock.items():
-        if key in current_remix:
+        if key == 'Frontend_PU_Version':
+            # Special handling for version: use stock value + branding
+            new_remix[key] = f"{stock_value} - ScCompLangPackRemix"
+            new_entry_count += 1
+        elif key in current_remix and key not in force_new_keys:
             # This key exists in the old remix, use the remixed value
             new_remix[key] = current_remix[key]
             # Check if it was actually remixed (different from stock)
