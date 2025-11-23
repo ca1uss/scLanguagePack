@@ -14,9 +14,11 @@ from typing import Dict, List, Optional
 import re
 
 # Configuration
+# Configuration
 SC_INSTALL_PATH = r"C:\Program Files\Roberts Space Industries\StarCitizen\LIVE"
-TOOLS_DIR = Path(__file__).parent / "tools"
-EXTRACT_DIR = Path(__file__).parent / "extracted"
+REPO_ROOT = Path(__file__).parent.parent
+TOOLS_DIR = REPO_ROOT / "tools"
+EXTRACT_DIR = REPO_ROOT / "extracted"
 UNP4K_EXE = TOOLS_DIR / "unp4k.exe"
 UNFORGE_EXE = TOOLS_DIR / "unforge.exe"
 
@@ -454,7 +456,7 @@ def main():
     print("\n[Phase 4] Loading localization data...")
     
     # Use the language pack's global.ini for name token resolution
-    lang_pack_path = Path(__file__).parent / args.version / args.channel / "data" / "Localization" / "english" / "global.ini"
+    lang_pack_path = REPO_ROOT / args.version / args.channel / "data" / "Localization" / "english" / "global.ini"
     
     if not lang_pack_path.exists():
         print(f"ERROR: Language pack not found at {lang_pack_path}")
