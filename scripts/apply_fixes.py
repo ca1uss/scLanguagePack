@@ -42,8 +42,8 @@ def apply_fixes():
     parser.add_argument('--channel', default='PTU', help='Game channel (e.g., PTU, LIVE)')
     args, _ = parser.parse_known_args()
 
-    base_dir = Path(__file__).parent
-    ini_path = base_dir / args.version / args.channel / "data" / "Localization" / "english" / "global.ini"
+    repo_root = Path(__file__).parent.parent
+    ini_path = repo_root / args.version / args.channel / "data" / "Localization" / "english" / "global.ini"
     
     if not ini_path.exists():
         print(f"Error: INI file not found at {ini_path}")
@@ -60,7 +60,7 @@ def apply_fixes():
     name_dict = audit_sc_native.parse_global_ini(ini_path)
     
     # 3. Scan Components
-    dcb_output = base_dir / "extracted" / "dcb"
+    dcb_output = repo_root / "extracted" / "dcb"
     libs_dir = dcb_output / "Data" / "libs"
     
     if not libs_dir.exists():
