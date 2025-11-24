@@ -34,39 +34,6 @@ def apply_fixes():
     print("=" * 60)
     print("Star Citizen Language Pack Fixer")
     print("=" * 60)
-
-    # 1. Setup paths
-    import argparse
-    parser = argparse.ArgumentParser(description='Star Citizen Language Pack Fixer')
-    parser.add_argument('--version', default='4.4.0', help='Game version (e.g., 4.4.0)')
-    parser.add_argument('--channel', default='PTU', help='Game channel (e.g., PTU, LIVE)')
-    args, _ = parser.parse_known_args()
-
-    repo_root = Path(__file__).parent.parent
-    ini_path = repo_root / args.version / args.channel / "data" / "Localization" / "english" / "global.ini"
-    
-    if not ini_path.exists():
-        print(f"Error: INI file not found at {ini_path}")
-        return
-
-    # 2. Load INI content
-    print(f"Loading {ini_path}...")
-    lines = load_ini_lines(ini_path)
-    key_map = map_ini_keys_to_lines(lines)
-    print(f"Mapped {len(key_map)} keys.")
-    
-    # Parse INI for lookups (using the robust parser from audit script)
-    # We need this to look up descriptions
-    name_dict = audit_sc_native.parse_global_ini(ini_path)
-    
-    # 3. Scan Components
-    dcb_output = repo_root / "extracted" / "dcb"
-    libs_dir = dcb_output / "Data" / "libs"
-    
-    if not libs_dir.exists():
-        print("Error: Extracted data not found. Run audit_sc_native.py first.")
-        return
-
     print("Scanning components...")
     # Pass name_dict although it might not be used by the walker itself, it's required by signature
     components = audit_sc_native.walk_component_xmls(libs_dir, name_dict)

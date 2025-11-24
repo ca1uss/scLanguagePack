@@ -403,8 +403,8 @@ def main():
     p4k_file = sc_path / "Data.p4k"
     
     # 2. Extract Game2.dcb (changed from Game.dcb for 4.4.0+)
-    print("\n[Phase 1] Extracting Game2.dcb...")
-    dcb_output = EXTRACT_DIR / "dcb"
+    print(f"\n[Phase 1] Extracting Game2.dcb to {extract_dir}...")
+    dcb_output = extract_dir / "dcb"
     dcb_path = dcb_output / "Data" / "Game2.dcb"
     
     if dcb_path.exists():
@@ -417,7 +417,7 @@ def main():
     
     # 3. Extract global.ini
     print("\n[Phase 2] Extracting global.ini...")
-    ini_output = EXTRACT_DIR / "localization"
+    ini_output = extract_dir / "localization"
     
     # Try primary path first
     if not extract_from_p4k(p4k_file, "Data/Libs/Localization/English/global.ini", ini_output):
@@ -450,8 +450,15 @@ def main():
     parser = argparse.ArgumentParser(description='Star Citizen Language Pack Auditor')
     parser.add_argument('--version', default='4.4.0', help='Game version (e.g., 4.4.0)')
     parser.add_argument('--channel', default='PTU', help='Game channel (e.g., PTU, LIVE)')
+    parser.add_argument('--extract-dir', default=None, help='Directory to extract game data to')
     args, _ = parser.parse_known_args()
 
+    # Determine extraction directory
+    if args.extract_dir:
+        extract_dir = Path(args.extract_dir)
+    else:
+        extract_dir = REPO_ROOT / "extracted"
+        
     # 5. Use language pack global.ini for name resolution
     print("\n[Phase 4] Loading localization data...")
     

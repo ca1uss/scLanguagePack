@@ -3,13 +3,14 @@ Star Citizen Language Pack Automation Tool
 
 This script orchestrates the entire process of updating the language pack for a new patch.
 It runs the following steps:
-1. Extraction: Extracts game data (Game.dcb, global.ini) using unp4k/unforge.
+1. Extraction: Extracts game data (Game.dcb, global.ini) using unp4k/unforge to a TEMP directory.
 2. Audit: Scans for component naming discrepancies.
 3. Fix: Applies automated naming fixes to the global.ini.
 4. Deploy: Optionally deploys the fixed file to the game directory.
+5. Cleanup: Removes the temporary extraction directory.
 
 Usage:
-    python automate_patch.py [--version 4.5.0] [--channel PTU] [--deploy]
+    python automate_patch.py [--version 4.5.0] [--channel PTU] [--deploy] [--auto-cleanup]
 """
 
 import os
@@ -17,11 +18,12 @@ import sys
 import subprocess
 import shutil
 import argparse
+import tempfile
 from pathlib import Path
 
 # Configuration
 SC_INSTALL_PATH = r"C:\Program Files\Roberts Space Industries\StarCitizen\LIVE"
-REPO_ROOT = Path(__file__).parent
+REPO_ROOT = Path(__file__).parent.parent
 
 def run_step(script_name: str, description: str, args: list) -> bool:
     """Run a python script as a subprocess with arguments."""
@@ -79,11 +81,49 @@ def deploy_file(version: str, channel: str):
     except Exception as e:
         print(f"Error deploying file: {e}")
 
+def cleanup_temp(temp_dir: Path, auto_cleanup: bool):
+    """Clean up the temporary directory."""
+    print(f"\n{'='*60}")
+    print("STEP: Cleanup")
+    print(f"{'='*60}")
+    
+    if not temp_dir.exists():
+        return
+
+    if auto_cleanup:
+        should_delete = True
+    else:
+        print(f"Temporary data is stored in: {temp_dir}")
+        print(f"Size: {get_dir_size_mb(temp_dir):.2f} MB")
+        response = input("Do you want to delete this temporary data? (y/n): ").lower()
+        should_delete = response == 'y'
+        
+    if should_delete:
+        print(f"Deleting {temp_dir}...")
+        try:
+            shutil.rmtree(temp_dir)
+            print("Cleanup complete.")
+        except Exception as e:
+            print(f"Error deleting temp dir: {e}")
+    else:
+        print(f"Skipping cleanup. Data remains in {temp_dir}")
+
+def get_dir_size_mb(path: Path) -> float:
+    """Calculate directory size in MB."""
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            if not os.path.islink(fp):
+                total_size += os.path.getsize(fp)
+    return total_size / (1024 * 1024)
+
 def main():
     parser = argparse.ArgumentParser(description='Star Citizen Language Pack Automation')
     parser.add_argument('--version', default='4.4.0', help='Game version (e.g., 4.4.0)')
     parser.add_argument('--channel', default='PTU', help='Game channel (e.g., PTU, LIVE)')
     parser.add_argument('--deploy', action='store_true', help='Deploy to game directory')
+    parser.add_argument('--auto-cleanup', action='store_true', help='Automatically delete temp files without prompting')
     args = parser.parse_args()
 
     print("Star Citizen Language Pack Automation")
@@ -91,29 +131,38 @@ def main():
     print(f"Target Version: {args.version}")
     print(f"Target Channel: {args.channel}")
     
-    # Construct args to pass to subprocesses
-    sub_args = ['--version', args.version, '--channel', args.channel]
+    # Create Temp Directory
+    temp_dir = Path(tempfile.mkdtemp(prefix="ScCompLangPackRemix_"))
+    print(f"Created temporary working directory: {temp_dir}")
     
-    # Step 1: Audit & Extraction (This script handles extraction if needed)
-    if not run_step("audit_sc_native.py", "Extracting Data & Initial Audit", sub_args):
-        print("Aborting due to failure in Step 1.")
-        return
+    try:
+        # Construct args to pass to subprocesses
+        sub_args = ['--version', args.version, '--channel', args.channel, '--extract-dir', str(temp_dir)]
         
-    # Step 2: Apply Fixes
-    if not run_step("apply_fixes.py", "Applying Naming Fixes", sub_args):
-        print("Aborting due to failure in Step 2.")
-        return
+        # Step 1: Audit & Extraction (This script handles extraction if needed)
+        if not run_step("audit_sc_native.py", "Extracting Data & Initial Audit", sub_args):
+            print("Aborting due to failure in Step 1.")
+            return
+            
+        # Step 2: Apply Fixes
+        if not run_step("apply_fixes.py", "Applying Naming Fixes", sub_args):
+            print("Aborting due to failure in Step 2.")
+            return
+            
+        # Step 3: Final Verification
+        if not run_step("audit_sc_native.py", "Verifying Fixes", sub_args):
+            print("Warning: Final verification reported issues (check report).")
         
-    # Step 3: Final Verification
-    if not run_step("audit_sc_native.py", "Verifying Fixes", sub_args):
-        print("Warning: Final verification reported issues (check report).")
-    
-    # Step 4: Deploy (Optional)
-    if args.deploy:
-        deploy_file(args.version, args.channel)
-    else:
-        print("\nSkipping deployment. Use --deploy to auto-install.")
-        print(f"You can manually copy the file from: {args.version}/{args.channel}/data/Localization/english/global.ini")
+        # Step 4: Deploy (Optional)
+        if args.deploy:
+            deploy_file(args.version, args.channel)
+        else:
+            print("\nSkipping deployment. Use --deploy to auto-install.")
+            print(f"You can manually copy the file from: {args.version}/{args.channel}/data/Localization/english/global.ini")
+            
+    finally:
+        # Step 5: Cleanup
+        cleanup_temp(temp_dir, args.auto_cleanup)
 
 if __name__ == "__main__":
     main()
