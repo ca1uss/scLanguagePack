@@ -68,7 +68,7 @@ def set_commodity_price():
 
             key, value = line.split("=", 1)
             commodity_name = value.strip()
-            commodity_name = re.sub(r"^\[\?\]", "", commodity_name)
+            commodity_name = re.sub(r"^\[\!\]", "", commodity_name)
             commodity_name = re.sub(r"\s+\d+(\.\d+)?.?/SCU$", "", commodity_name).strip()
 
             match = next(
