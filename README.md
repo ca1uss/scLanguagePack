@@ -6,7 +6,7 @@ This is a modified fork of a fork of the original [Component Language Pack by Ex
 ## Changes
 - Added **average** prices to most commodities
 - Replaced some ship names with their well known nicknames eg Ursa Medivac -> Nursa
-
+- Some basic troubleshooting for error codes
 
 ## Notes
 
