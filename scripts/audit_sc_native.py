@@ -14,9 +14,8 @@ from typing import Dict, List, Optional
 import re
 
 # Configuration
-# Configuration
 SC_INSTALL_PATH = r"C:\Program Files\Roberts Space Industries\StarCitizen\LIVE"
-REPO_ROOT = Path(__file__).parent.parent
+REPO_ROOT = Path(r"C:\Users\mark\ScCompLangPackRemix")
 TOOLS_DIR = REPO_ROOT / "tools"
 EXTRACT_DIR = REPO_ROOT / "extracted"
 UNP4K_EXE = TOOLS_DIR / "unp4k.exe"
@@ -395,6 +394,20 @@ def main():
     print("Star Citizen Language Pack Auditor (Native Extraction)")
     print("=" * 60)
     
+    # Parse arguments
+    import argparse
+    parser = argparse.ArgumentParser(description='Star Citizen Language Pack Auditor')
+    parser.add_argument('--version', default='4.4.0', help='Game version (e.g., 4.4.0)')
+    parser.add_argument('--channel', default='PTU', help='Game channel (e.g., PTU, LIVE)')
+    parser.add_argument('--extract-dir', default=None, help='Directory to extract game data to')
+    args, _ = parser.parse_known_args()
+
+    # Determine extraction directory
+    if args.extract_dir:
+        extract_dir = Path(args.extract_dir)
+    else:
+        extract_dir = REPO_ROOT / "extracted"
+
     # 1. Find SC installation
     sc_path = find_sc_installation()
     if not sc_path:
@@ -445,20 +458,7 @@ def main():
         if not unforge_dcb(dcb_file):
             return 1
     
-    # Parse arguments
-    import argparse
-    parser = argparse.ArgumentParser(description='Star Citizen Language Pack Auditor')
-    parser.add_argument('--version', default='4.4.0', help='Game version (e.g., 4.4.0)')
-    parser.add_argument('--channel', default='PTU', help='Game channel (e.g., PTU, LIVE)')
-    parser.add_argument('--extract-dir', default=None, help='Directory to extract game data to')
-    args, _ = parser.parse_known_args()
 
-    # Determine extraction directory
-    if args.extract_dir:
-        extract_dir = Path(args.extract_dir)
-    else:
-        extract_dir = REPO_ROOT / "extracted"
-        
     # 5. Use language pack global.ini for name resolution
     print("\n[Phase 4] Loading localization data...")
     
