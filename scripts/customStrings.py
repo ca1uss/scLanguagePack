@@ -1,6 +1,11 @@
 import os
 import re
 from pathlib import Path
+import shutil
+
+# YOU MAY NEED TO CHANGE THIS
+game_directory = r"C:\Program Files\Roberts Space Industries\StarCitizen\LIVE"
+#
 
 def parse_version(name):
     parts = name.split(".")
@@ -77,7 +82,7 @@ def main():
 
     loc = os.path.join(target_env, "data", "Localization", "english")
 
-    global_ini   = os.path.join(loc, "global.ini")
+    global_ini = os.path.join(loc, "global.ini")
     modified_ini = ROOT + r"\target_strings.ini"
 
     if not (os.path.isfile(global_ini) and os.path.isfile(modified_ini)):
@@ -99,6 +104,22 @@ def main():
 
     print(f"Updated: {global_ini}")
     print(f"Source:  {modified_ini}")
+    print("Pushing to game directory...")
+
+    
+
+    dest_dir = Path(game_directory) / "data" / "Localization" / "english"
+    dest_path = dest_dir
+
+    source_path = Path(version_dir) / "LIVE" / "data" / "Localization" / "english" / "global.ini"
+
+    try:
+        dest_dir.mkdir(parents=True, exist_ok=True)  
+        shutil.copy2(source_path, dest_path)
+        print(f"Success! Deployed to: {dest_path}")
+    except Exception as e:
+        print(f"Error deploying file: {e}")
+
 
 if __name__ == "__main__":
     main()

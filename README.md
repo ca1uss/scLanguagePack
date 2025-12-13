@@ -8,6 +8,12 @@ This is a modified fork of a fork of the original [Component Language Pack by Ex
 - Replaced some ship names with their well known nicknames eg Ursa Medivac -> Nursa
 - Some basic troubleshooting for error codes
 
+## Usage
+- `process-new-patch.py` will get all new strings when you install a new patch
+- `getPrices.py` will update commodity prices according to UEX data (may take a few days to update)
+- copy any lines from `global.ini` to `target_strings.ini` and modify to your hearts content
+- `customStrings.py` will merge your changes to `global.ini` and move it to the game directory (you may need to change the game path manually)
+
 ## Notes
 
 - This project is not affiliated with Cloud Imperium Games.
