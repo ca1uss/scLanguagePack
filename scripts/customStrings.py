@@ -70,7 +70,8 @@ def merge_ini(global_lines, modified_data):
 
 def main():
     # Root folder containing version directories
-    ROOT = r"C:\Users\mark\scLanguagePack"
+    ROOT = os.getcwd()
+    print(ROOT)
 
     version_dir = find_latest_version(ROOT)
     target_env  = find_target_env(version_dir)
@@ -79,7 +80,7 @@ def main():
     loc = os.path.join(target_env, "data", "Localization", "english")
 
     global_ini   = os.path.join(loc, "global.ini")
-    modified_ini = r"C:\Users\mark\scLanguagePack\target_strings.ini"
+    modified_ini = ROOT + r"\target_strings.ini"
 
     if not (os.path.isfile(global_ini) and os.path.isfile(modified_ini)):
         raise Exception("global.ini or target_strings.ini not found.")
