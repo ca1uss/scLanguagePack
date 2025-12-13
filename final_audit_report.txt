@@ -1,0 +1,108 @@
+============================================================
+AUDIT REPORT
+============================================================
+
+Total Components Scanned: 299
+Correct Names: 257
+Mismatches: 15
+Missing from Language Pack: 1
+Placeholders Ignored: 26
+
+------------------------------------------------------------
+MISMATCHES (First 20):
+------------------------------------------------------------
+
+Component: @item_NameCOOL_AEGS_S04_Reclaimer
+  Expected: I4A ...
+  Actual:   Algid
+  Key:      item_NameCOOL_AEGS_S04_Reclaimer
+  Class:    Industrial
+
+Component: @item_NameCOOL_ORIG_S04_890J_SCItem
+  Expected: C4A ...
+  Actual:   Serac
+  Key:      item_NameCOOL_ORIG_S04_890J_SCItem
+  Class:    Civilian
+
+Component: @item_NameCOOL_ORIG_S04_890J_SCItem
+  Expected: C4A ...
+  Actual:   Serac
+  Key:      item_NameCOOL_ORIG_S04_890J_SCItem
+  Class:    Civilian
+
+Component: @item_NameIdris_PowerPlant
+  Expected: C4A ...
+  Actual:   Main Powerplant
+  Key:      item_NameIdris_PowerPlant
+  Class:    Unknown
+
+Component: @item_NameIdris_PowerPlant
+  Expected: C4A ...
+  Actual:   Main Powerplant
+  Key:      item_NameIdris_PowerPlant
+  Class:    Unknown
+
+Component: @item_NamePOWR_ORIG_S04_890J_SCItem
+  Expected: C4A ...
+  Actual:   Stellate
+  Key:      item_NamePOWR_ORIG_S04_890J_SCItem
+  Class:    Civilian
+
+Component: @item_NameIdris_PowerPlant
+  Expected: C4A ...
+  Actual:   Main Powerplant
+  Key:      item_NameIdris_PowerPlant
+  Class:    Unknown
+
+Component: @item_NamePOWR_ORIG_S04_890J_SCItem
+  Expected: C4A ...
+  Actual:   Stellate
+  Key:      item_NamePOWR_ORIG_S04_890J_SCItem
+  Class:    Civilian
+
+Component: @item_NameQDRV_ORIG_S04_890J_SCItem
+  Expected: C4A ...
+  Actual:   Allegro
+  Key:      item_NameQDRV_ORIG_S04_890J_SCItem
+  Class:    Civilian
+
+Component: @item_NameQDRV_WETK_S04_Idris
+  Expected: C4A ...
+  Actual:   Frontline
+  Key:      item_NameQDRV_WETK_S04_Idris
+  Class:    Unknown
+
+Component: @item_NameSHLD_AEGS_S04_Reclaimer_SCItem
+  Expected: I4A ...
+  Actual:   RS-Barrier
+  Key:      item_NameSHLD_AEGS_S04_Reclaimer_SCItem
+  Class:    Industrial
+
+Component: @item_NameSHLD_GODI_S04_Idris
+  Expected: C4A ...
+  Actual:   Holdstrong
+  Key:      item_NameSHLD_GODI_S04_Idris
+  Class:    Unknown
+
+Component: @item_NameSHLD_GODI_S04_Idris
+  Expected: C4A ...
+  Actual:   Holdstrong
+  Key:      item_NameSHLD_GODI_S04_Idris
+  Class:    Unknown
+
+Component: @item_NameSHLD_ORIG_S04_890J_SCItem
+  Expected: I4A ...
+  Actual:   Glacis
+  Key:      item_NameSHLD_ORIG_S04_890J_SCItem
+  Class:    Industrial
+
+Component: @item_NameSHLD_ORIG_S04_890J_SCItem
+  Expected: I4A ...
+  Actual:   Glacis
+  Key:      item_NameSHLD_ORIG_S04_890J_SCItem
+  Class:    Industrial
+
+------------------------------------------------------------
+MISSING FROM LANGUAGE PACK (First 20):
+------------------------------------------------------------
+  @item_NameCOOL_AEGS_S04_Idirs -> C4A ...

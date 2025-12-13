@@ -5,7 +5,6 @@ import os
 
 def set_commodity_price():
     try:
-        # Safe fallback when __file__ doesn't exist
         script_dir = (
             os.path.dirname(os.path.realpath(__file__))
             if "__file__" in globals()
