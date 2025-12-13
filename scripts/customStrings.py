@@ -71,11 +71,9 @@ def merge_ini(global_lines, modified_data):
 def main():
     # Root folder containing version directories
     ROOT = os.getcwd()
-    print(ROOT)
 
     version_dir = find_latest_version(ROOT)
     target_env  = find_target_env(version_dir)
-    print(f'target env = ' + target_env)
 
     loc = os.path.join(target_env, "data", "Localization", "english")
 
