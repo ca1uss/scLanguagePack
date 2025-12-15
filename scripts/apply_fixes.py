@@ -30,10 +30,15 @@ def map_ini_keys_to_lines(lines: List[str]) -> Dict[str, int]:
         key_map[key] = i
     return key_map
 
-def apply_fixes():
+def apply_fixes(libs_dir: Path, name_dict: Dict[str, str], ini_path: Path, lines: List[str]):
     print("=" * 60)
     print("Star Citizen Language Pack Fixer")
     print("=" * 60)
+    
+    # Generate key map
+    print("Mapping INI keys...")
+    key_map = map_ini_keys_to_lines(lines)
+    
     print("Scanning components...")
     # Pass name_dict although it might not be used by the walker itself, it's required by signature
     components = audit_sc_native.walk_component_xmls(libs_dir, name_dict)
@@ -120,4 +125,50 @@ def apply_fixes():
         print("No updates needed.")
 
 if __name__ == "__main__":
-    apply_fixes()
+    import argparse
+    parser = argparse.ArgumentParser(description='Star Citizen Language Pack Fixer')
+    parser.add_argument('--version', default='4.4.0', help='Game version (e.g., 4.4.0)')
+    parser.add_argument('--channel', default='LIVE', help='Game channel (e.g., PTU, LIVE)')
+    parser.add_argument('--extract-dir', default=None, help='Temporary directory where game data is extracted')
+    args = parser.parse_args()
+
+    # Setup paths
+    REPO_ROOT = Path(__file__).resolve().parent.parent
+    
+    if args.extract_dir:
+        EXTRACT_DIR = Path(args.extract_dir)
+    else:
+        EXTRACT_DIR = REPO_ROOT / "extracted"
+    
+    # Check for extracted data
+    libs_dir = EXTRACT_DIR / "dcb" / "Data" / "libs"
+    if not libs_dir.exists():
+        # Try alternate path
+        libs_dir = EXTRACT_DIR / "dcb" / "Data" / "Libs"
+    
+    if not libs_dir.exists():
+        print(f"ERROR: Component data not found at {libs_dir}")
+        print("Please run audit_sc_native.py first to extract data.")
+        sys.exit(1)
+
+    # Find Language Pack global.ini
+    lang_pack_path = REPO_ROOT / args.version / args.channel / "data" / "Localization" / "english" / "global.ini"
+    
+    if not lang_pack_path.exists():
+        print(f"ERROR: Language pack not found at {lang_pack_path}")
+        sys.exit(1)
+        
+    print(f"Target Language Pack: {lang_pack_path}")
+    
+    # Load data
+    print("Loading INI lines...")
+    lines = load_ini_lines(lang_pack_path)
+    
+    print("Parsing INI for name dictionary...")
+    name_dict = audit_sc_native.parse_global_ini(lang_pack_path)
+    
+    if not name_dict:
+        print("ERROR: Failed to parse language pack")
+        sys.exit(1)
+
+    apply_fixes(libs_dir, name_dict, lang_pack_path, lines)
