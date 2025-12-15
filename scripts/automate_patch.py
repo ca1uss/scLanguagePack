@@ -23,7 +23,8 @@ from pathlib import Path
 
 # Configuration
 SC_INSTALL_PATH = r"C:\Program Files\Roberts Space Industries\StarCitizen\LIVE"
-REPO_ROOT = Path(__file__).parent.parent
+REPO_ROOT = Path.cwd()
+print(f"root {REPO_ROOT}")
 
 def run_step(script_name: str, description: str, args: list) -> bool:
     """Run a python script as a subprocess with arguments."""
@@ -121,7 +122,7 @@ def get_dir_size_mb(path: Path) -> float:
 def main():
     parser = argparse.ArgumentParser(description='Star Citizen Language Pack Automation')
     parser.add_argument('--version', default='4.4.0', help='Game version (e.g., 4.4.0)')
-    parser.add_argument('--channel', default='PTU', help='Game channel (e.g., PTU, LIVE)')
+    parser.add_argument('--channel', default='LIVE', help='Game channel (e.g., PTU, LIVE)')
     parser.add_argument('--deploy', action='store_true', help='Deploy to game directory')
     parser.add_argument('--auto-cleanup', action='store_true', help='Automatically delete temp files without prompting')
     args = parser.parse_args()

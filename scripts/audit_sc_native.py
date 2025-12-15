@@ -15,7 +15,7 @@ import re
 
 # Configuration
 SC_INSTALL_PATH = r"C:\Program Files\Roberts Space Industries\StarCitizen\LIVE"
-REPO_ROOT = os.getcwd()
+REPO_ROOT = Path.cwd()
 TOOLS_DIR = REPO_ROOT / "tools"
 EXTRACT_DIR = REPO_ROOT / "extracted"
 UNP4K_EXE = TOOLS_DIR / "unp4k.exe"
