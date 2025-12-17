@@ -6,13 +6,21 @@ This is a modified fork of a fork of the original [Component Language Pack by Ex
 ## Changes
 - Added **average** prices to most commodities
 - Replaced some ship names with their well known nicknames eg Ursa Medivac -> Nursa
-- Some basic troubleshooting for error codes
+- Some basic troubleshooting for error codes and clearer UI stuff
+- Markers to signify illegal cargo
 
-## Usage
+## Applying to the game
+1. Copy the `Localization` folder of the current game version
+2. Navigate to `StarCitizen/LIVE/data` and paste `Localization`
+3. In `/LIVE`, create a file `user.cfg` and add `g_language = english`, or use the one provided  
+
+## Modifying and creating your own version
+- **If you have a non default install path, you will need to update almost all files to acknowledge this**
+- Copy any lines from `global.ini` to `target_strings.ini` and modify to your hearts content
+- `customStrings.py` will merge your changes to `global.ini` and move it to the game directory 
 - `process-new-patch.py` will get all new strings when you install a new patch
-- `getPrices.py` will update commodity prices according to UEX data (may take a few days to update)
-- copy any lines from `global.ini` to `target_strings.ini` and modify to your hearts content
-- `customStrings.py` will merge your changes to `global.ini` and move it to the game directory (you may need to change the game path manually)
+- `getPrices.py` will update commodity prices according to UEX data (may take a few days to update after a oatch)
+
 
 ## Notes
 

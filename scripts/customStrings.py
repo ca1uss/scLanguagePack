@@ -30,11 +30,20 @@ def find_latest_version(root):
 def find_target_env(version_dir):
     live = os.path.join(version_dir, "LIVE")
     ptu  = os.path.join(version_dir, "PTU")
-
-    if os.path.isdir(live):
-        return live
-    if os.path.isdir(ptu):
+    
+    if os.path.isdir(live) and os.path.isdir(ptu):
+        while True:
+            response = input("patch LIVE or PTU?: ").strip().lower()
+            if response == 'live':
+                return live
+            elif response == 'ptu':
+                return ptu
+            else:
+                print("please input 'live' or 'ptu' :)")
+    elif os.path.isdir(ptu):
         return ptu
+    elif os.path.isdir(live):
+        return live
     raise Exception("Neither LIVE nor PTU exists inside version folder.")
 
 

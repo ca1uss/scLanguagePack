@@ -389,11 +389,48 @@ def print_audit_report(results: Dict):
             print(f"  {item['component']} -> {item['expected']}")
 
 
+def parse_version(name):
+    parts = name.split(".")
+    try:
+        return tuple(int(p) for p in parts)
+    except:
+        return None
+
+def find_latest_version(root):
+    candidates = []
+    for item in os.listdir(root):
+        full = os.path.join(root, item)
+        if os.path.isdir(full):
+            version = parse_version(item)
+            if version:
+                candidates.append((version, full))
+    if not candidates:
+        raise Exception("No valid version folders found.")
+    return max(candidates)[1]  # highest version tuple
+
+
+def find_target_env(version_dir):
+    live = os.path.join(version_dir, "LIVE")
+    ptu  = os.path.join(version_dir, "PTU")
+
+    if os.path.isdir(live):
+        return live
+    if os.path.isdir(ptu):
+        return ptu
+    raise Exception("Neither LIVE nor PTU exists inside version folder.")
+
 def main():
     print("=" * 60)
     print("Star Citizen Language Pack Auditor (Native Extraction)")
     print("=" * 60)
     
+    ROOT = os.getcwd()
+    version_dir = find_latest_version(ROOT)
+    target_env  = find_target_env(version_dir)
+
+    print(f"targetenv: {target_env}")
+    print(f"versiondir: {version_dir}")
+
     # Parse arguments
     import argparse
     parser = argparse.ArgumentParser(description='Star Citizen Language Pack Auditor')
