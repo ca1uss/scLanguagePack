@@ -7,3 +7,5 @@ __pycache__/
 ./extracted
 .final_audit_report.txt
 extracted/dcb/Data/Game2.dcb
+extracted/dcb/Data/
+extracted/dcb/Data

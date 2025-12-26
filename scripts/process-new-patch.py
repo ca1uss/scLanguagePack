@@ -163,27 +163,8 @@ def applyChanges():
     temp_dir = Path(tempfile.mkdtemp(prefix="ScCompLangPackRemix_"))
     print(f"Created temporary working directory: {temp_dir}")
     
-    try:
-        # Construct args to pass to subprocesses
-        sub_args = ['--version', version, '--channel', channel, '--extract-dir', str(temp_dir)]
-        
-        # Step 1: Audit & Extraction (This script handles extraction if needed)
-        if not run_step("audit_sc_native.py", "Extracting Data & Initial Audit", sub_args):
-            print("Aborting due to failure in Step 1.")
-            return
-            
-        # Step 2: Apply Fixes
-        if not run_step("apply_fixes.py", "Applying Naming Fixes", sub_args):
-            print("Aborting due to failure in Step 2.")
-            return
-            
-        # Step 3: Final Verification
-        if not run_step("audit_sc_native.py", "Verifying Fixes", sub_args):
-            print("Warning: Final verification reported issues (check report).")
-            
-    finally:
-        # Step 5: Cleanup
-        cleanup_temp(temp_dir, True)
+    # Step 5: Cleanup
+    cleanup_temp(temp_dir, True)
 
 def updateNewIni():
     version = find_ini_versions(REPO_ROOT, 'new')

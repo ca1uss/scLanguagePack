@@ -26,7 +26,6 @@ def find_latest_version(root):
         raise Exception("No valid version folders found.")
     return max(candidates)[1]  # highest version tuple
 
-
 def find_target_env(root, flag):
     version = None
     if flag:
@@ -52,7 +51,6 @@ def find_target_env(root, flag):
         return ptu
     raise Exception("Neither LIVE nor PTU exists inside version folder.")
 
-
 def parse_ini_lines(lines):
     data = {}
     for line in lines:
@@ -62,7 +60,6 @@ def parse_ini_lines(lines):
             val = m.group(2)
             data[key] = val
     return data
-
 
 def merge_ini(global_lines, modified_data):
     output = []
@@ -93,7 +90,6 @@ def main():
     ROOT = os.getcwd()
 
     target_env  = find_target_env(ROOT, True)
-    print('target env: ' + target_env)
 
     loc = os.path.join(target_env, "data", "Localization", "english")
 

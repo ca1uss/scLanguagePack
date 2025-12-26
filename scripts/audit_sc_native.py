@@ -400,7 +400,6 @@ def parse_version(name):
 def find_ini_versions(root, version):
     candidates = []
     for item in os.listdir(root):
-        print(item)
         full = os.path.join(root, item)
         if os.path.isdir(full):
             version = parse_version(item)
