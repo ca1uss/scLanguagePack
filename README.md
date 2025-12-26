@@ -19,7 +19,7 @@ This is a modified fork of a fork of the original [Component Language Pack by Ex
 - Copy any lines from `global.ini` to `target_strings.ini` and modify to your hearts content
 - `customStrings.py` will merge your changes to `global.ini` and move it to the game directory 
 - `process-new-patch.py` will get all new strings when you install a new patch
-- `getPrices.py` will update commodity prices according to UEX data (may take a few days to update after a oatch)
+- `getPrices.py` will update commodity prices according to UEX data (may take a few days to update after a patch)
 
 
 ## Notes

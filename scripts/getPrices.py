@@ -5,11 +5,7 @@ import os
 
 def set_commodity_price():
     try:
-        script_dir = (
-            os.path.dirname(os.path.realpath(__file__))
-            if "__file__" in globals()
-            else os.getcwd()
-        )
+        script_dir = os.getcwd()
         ini_path = os.path.join(script_dir, "target_strings.ini")
 
         if not os.path.exists(ini_path):

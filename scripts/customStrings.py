@@ -4,8 +4,8 @@ from pathlib import Path
 import shutil
 
 # YOU MAY NEED TO CHANGE THIS
-game_directory = r"C:\Program Files\Roberts Space Industries\StarCitizen\LIVE"
-#
+SC_INSTALL_PATH = r"C:\Program Files\Roberts Space Industries\StarCitizen"
+
 
 def parse_version(name):
     parts = name.split(".")
@@ -27,10 +27,16 @@ def find_latest_version(root):
     return max(candidates)[1]  # highest version tuple
 
 
-def find_target_env(version_dir):
-    live = os.path.join(version_dir, "LIVE")
-    ptu  = os.path.join(version_dir, "PTU")
+def find_target_env(root, flag):
+    version = None
+    if flag:
+        version = find_latest_version(root) 
+    else: 
+        version = root # script directory
     
+    live = os.path.join(version, "LIVE")
+    ptu  = os.path.join(version, "PTU")
+   
     if os.path.isdir(live) and os.path.isdir(ptu):
         while True:
             response = input("patch LIVE or PTU?: ").strip().lower()
@@ -40,10 +46,10 @@ def find_target_env(version_dir):
                 return ptu
             else:
                 print("please input 'live' or 'ptu' :)")
-    elif os.path.isdir(ptu):
-        return ptu
     elif os.path.isdir(live):
         return live
+    elif os.path.isdir(ptu):
+        return ptu
     raise Exception("Neither LIVE nor PTU exists inside version folder.")
 
 
@@ -83,11 +89,11 @@ def merge_ini(global_lines, modified_data):
     return output
 
 def main():
-    # Root folder containing version directories
+    # C:\users\user\scLanguagePack
     ROOT = os.getcwd()
 
-    version_dir = find_latest_version(ROOT)
-    target_env  = find_target_env(version_dir)
+    target_env  = find_target_env(ROOT, True)
+    print('target env: ' + target_env)
 
     loc = os.path.join(target_env, "data", "Localization", "english")
 
@@ -115,16 +121,14 @@ def main():
     print(f"Source:  {modified_ini}")
     print("Pushing to game directory...")
 
-    
-
-    dest_dir = Path(game_directory) / "data" / "Localization" / "english"
+    game_dir = find_target_env(SC_INSTALL_PATH, False)
+    dest_dir = Path(game_dir) / "data" / "Localization" / "english"
+    print(dest_dir)
     dest_path = dest_dir
-
-    source_path = Path(version_dir) / "LIVE" / "data" / "Localization" / "english" / "global.ini"
 
     try:
         dest_dir.mkdir(parents=True, exist_ok=True)  
-        shutil.copy2(source_path, dest_path)
+        shutil.copy2(global_ini, dest_path)
         print(f"Success! Deployed to: {dest_path}")
     except Exception as e:
         print(f"Error deploying file: {e}")

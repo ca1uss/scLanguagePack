@@ -46,7 +46,7 @@ def find_sc_installation() -> Optional[Path]:
             print(f"Found Star Citizen at: {default_path}")
             return default_path
     
-    print("ERROR: Cannot find Star Citizen installation")
+    print("ERROR: Cannot find Star Citizen installation. Please update SC_INSTALL_PATH on line 17")
     print(f"Expected: {default_path}")
     return None
 
@@ -396,61 +396,69 @@ def parse_version(name):
     except:
         return None
 
-def find_latest_version(root):
+
+def find_ini_versions(root, version):
     candidates = []
     for item in os.listdir(root):
+        print(item)
         full = os.path.join(root, item)
         if os.path.isdir(full):
             version = parse_version(item)
             if version:
-                candidates.append((version, full))
+                candidates.append((version, full))\
+
     if not candidates:
         raise Exception("No valid version folders found.")
-    return max(candidates)[1]  # highest version tuple
+    
+    if version == 'new':
+        return max(candidates)[1]  # highest version tuple
+    else:
+        return sorted(candidates)[-2][1] # second highest version
 
 
 def find_target_env(version_dir):
     live = os.path.join(version_dir, "LIVE")
     ptu  = os.path.join(version_dir, "PTU")
-
-    if os.path.isdir(live):
+    
+    if os.path.isdir(live) and os.path.isdir(ptu):
+        while True:
+            response = input("patch LIVE or PTU?: ").strip().lower()
+            if response == 'live':
+                return live
+            elif response == 'ptu':
+                return ptu
+            else:
+                print("please input 'live' or 'ptu' :)")
+    elif os.path.isdir(live):
         return live
-    if os.path.isdir(ptu):
+    elif os.path.isdir(ptu):
         return ptu
     raise Exception("Neither LIVE nor PTU exists inside version folder.")
+
 
 def main():
     print("=" * 60)
     print("Star Citizen Language Pack Auditor (Native Extraction)")
     print("=" * 60)
     
-    ROOT = os.getcwd()
-    version_dir = find_latest_version(ROOT)
-    target_env  = find_target_env(version_dir)
-
-    print(f"targetenv: {target_env}")
-    print(f"versiondir: {version_dir}")
-
-    # Parse arguments
-    import argparse
-    parser = argparse.ArgumentParser(description='Star Citizen Language Pack Auditor')
-    parser.add_argument('--version', default='4.4.0', help='Game version (e.g., 4.4.0)')
-    parser.add_argument('--channel', default='PTU', help='Game channel (e.g., PTU, LIVE)')
-    parser.add_argument('--extract-dir', default=None, help='Directory to extract game data to')
-    args, _ = parser.parse_known_args()
-
-    # Determine extraction directory
-    if args.extract_dir:
-        extract_dir = Path(args.extract_dir)
-    else:
-        extract_dir = REPO_ROOT / "extracted"
-
     # 1. Find SC installation
     sc_path = find_sc_installation()
     if not sc_path:
         return 1
-    
     p4k_file = sc_path / "Data.p4k"
+
+    ROOT = os.getcwd()
+    version_dir = find_ini_versions(ROOT, 'new')
+    target_env  = find_target_env(version_dir)
+
+    print(f"targetenv: {target_env}")
+    print(f"versiondir: {version_dir}")
+    match = re.search(r"\\StarCitizen\\([^\\]+)" , str(sc_path))
+    if match:
+        channel = match.group(1)
+        print('channel ' + channel)
+   
+    extract_dir = REPO_ROOT / "extracted"
     
     # 2. Extract Game2.dcb (changed from Game.dcb for 4.4.0+)
     print(f"\n[Phase 1] Extracting Game2.dcb to {extract_dir}...")
@@ -500,11 +508,11 @@ def main():
     print("\n[Phase 4] Loading localization data...")
     
     # Use the language pack's global.ini for name token resolution
-    lang_pack_path = REPO_ROOT / args.version / args.channel / "data" / "Localization" / "english" / "global.ini"
+    lang_pack_path = REPO_ROOT / '4.5.0' / channel / "data" / "Localization" / "english" / "global.ini"
     
     if not lang_pack_path.exists():
         print(f"ERROR: Language pack not found at {lang_pack_path}")
-        print(f"Please ensure your language pack is in the {args.version}/{args.channel}/data/Localization/english/ directory")
+        print(f"Please ensure your language pack is in the 4.5.0/{channel}/data/Localization/english/ directory")
         return 1
     
     print(f"Using language pack at: {lang_pack_path}")

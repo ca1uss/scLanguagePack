@@ -2,12 +2,21 @@
 """
 Process new Star Citizen patch global.ini file.
 Preserves existing remix formatting and keeps new entries in stock format.
-"""
+Updates new entries based on extracted game data using unp4k
 
-import argparse
+"""
 import sys
 from pathlib import Path
 from typing import Dict
+import os
+import subprocess
+import shutil
+import tempfile
+
+# Configuration
+SC_INSTALL_PATH = r"C:\Program Files\Roberts Space Industries\StarCitizen" # CHANGE THIS IF ITS NOT CORRECT FOR YOU
+REPO_ROOT = Path.cwd()
+current_version = None
 
 def read_ini_file(file_path: Path) -> Dict[str, str]:
     """Read an ini file and return a dict of key=value pairs."""
@@ -27,23 +36,164 @@ def read_ini_file(file_path: Path) -> Dict[str, str]:
         sys.exit(1)
     return entries
 
-def main():
-    parser = argparse.ArgumentParser(description='Merge Star Citizen global.ini files.')
-    parser.add_argument('--old-remix', type=Path, default=Path('4.3.2/LIVE/data/Localization/english/global.ini'),
-                        help='Path to the previous version remixed global.ini')
-    parser.add_argument('--new-stock', type=Path, default=Path('4.4.0/PTU/stock-global.ini'),
-                        help='Path to the new version stock global.ini')
-    parser.add_argument('--output', type=Path, default=Path('4.4.0/PTU/data/Localization/english/global.ini'),
-                        help='Path to save the merged global.ini')
+def run_step(script_name: str, description: str, args: list) -> bool:
+    """Run a python script as a subprocess with arguments."""
+    print(f"\n{'='*60}")
+    print(f"STEP: {description}")
+    print(f"{'='*60}")
+    
+    script_path = REPO_ROOT / "scripts" / script_name
+    if not script_path.exists():
+        print(f"Error: Script {script_name} not found at {script_path}!")
+        return False
+        
+    cmd = [sys.executable, str(script_path)] + args
+    
+    try:
+        result = subprocess.run(
+            cmd,
+            cwd=str(REPO_ROOT),
+            check=False
+        )
+        
+        if result.returncode != 0:
+            print(f"Error: {script_name} failed with exit code {result.returncode}")
+            return False
+            
+        return True
+        
+    except Exception as e:
+        print(f"Error running {script_name}: {e}")
+        return False
 
-    args = parser.parse_args()
+def cleanup_temp(temp_dir: Path, auto_cleanup: bool):
+    """Clean up the temporary directory."""
+    print(f"\n{'='*60}")
+    print("STEP: Cleanup")
+    print(f"{'='*60}")
+    
+    if not temp_dir.exists():
+        return
 
-    current_remix_path = args.old_remix
-    new_stock_path = args.new_stock
-    output_path = args.output
+    if auto_cleanup:
+        should_delete = True
+    else:
+        print(f"Temporary data is stored in: {temp_dir}")
+        print(f"Size: {get_dir_size_mb(temp_dir):.2f} MB")
+        response = input("Do you want to delete this temporary data? (y/n): ").lower()
+        should_delete = response == 'y'
+        
+    if should_delete:
+        print(f"Deleting {temp_dir}...")
+        try:
+            shutil.rmtree(temp_dir)
+            print("Cleanup complete.")
+        except Exception as e:
+            print(f"Error deleting temp dir: {e}")
+    else:
+        print(f"Skipping cleanup. Data remains in {temp_dir}")
+
+def get_dir_size_mb(path: Path) -> float:
+    """Calculate directory size in MB."""
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            if not os.path.islink(fp):
+                total_size += os.path.getsize(fp)
+    return total_size / (1024 * 1024)
+
+def find_target_env(installPath):
+    live = os.path.join(installPath, "LIVE")
+    ptu  = os.path.join(installPath, "PTU")
+    
+    if os.path.isdir(live) and os.path.isdir(ptu):
+        while True:
+            response = input("patch LIVE or PTU?: ").strip().lower()
+            if response == 'live':
+                return live
+            elif response == 'ptu':
+                return ptu
+            else:
+                print("please input 'live' or 'ptu' :)")
+    elif os.path.isdir(live):
+        return live
+    elif os.path.isdir(ptu):
+        return ptu
+    raise Exception(f"Neither LIVE nor PTU exists inside {installPath}.\nIf that is not the correct location for the game, please update SC_INSTALL_PATH on line 15")
+
+def find_ini_versions(root, age):
+    candidates = []
+    for item in os.listdir(root):
+        full = os.path.join(root, item)
+        if os.path.isdir(full):
+            version = parse_version(item)
+            if version:
+                candidates.append((version, full))\
+
+    if not candidates:
+        raise Exception("No valid version folders found.")
+    
+    if age == 'new':
+        print('old: ' + max(candidates)[1])
+        return max(candidates)[1]  # highest version tuple
+    elif age == 'old':
+        print('old: ' + sorted(candidates)[-2][1])
+        return sorted(candidates)[-2][1]
+    else:
+        raise Exception("Version not found")
+
+def parse_version(name):
+    parts = name.split(".")
+    try:
+        return tuple(int(p) for p in parts)
+    except:
+        return None
+
+def applyChanges():
+    channel = find_target_env(SC_INSTALL_PATH)
+    version = find_ini_versions(REPO_ROOT, 'new')
+
+    print("Star Citizen Language Pack Automation")
+    print("-------------------------------------")
+    print(f"Target Version: {version}")
+    print(f"Target Channel: {version}")
+    
+    # Create Temp Directory
+    temp_dir = Path(tempfile.mkdtemp(prefix="ScCompLangPackRemix_"))
+    print(f"Created temporary working directory: {temp_dir}")
+    
+    try:
+        # Construct args to pass to subprocesses
+        sub_args = ['--version', version, '--channel', channel, '--extract-dir', str(temp_dir)]
+        
+        # Step 1: Audit & Extraction (This script handles extraction if needed)
+        if not run_step("audit_sc_native.py", "Extracting Data & Initial Audit", sub_args):
+            print("Aborting due to failure in Step 1.")
+            return
+            
+        # Step 2: Apply Fixes
+        if not run_step("apply_fixes.py", "Applying Naming Fixes", sub_args):
+            print("Aborting due to failure in Step 2.")
+            return
+            
+        # Step 3: Final Verification
+        if not run_step("audit_sc_native.py", "Verifying Fixes", sub_args):
+            print("Warning: Final verification reported issues (check report).")
+            
+    finally:
+        # Step 5: Cleanup
+        cleanup_temp(temp_dir, True)
+
+def updateNewIni():
+    version = find_ini_versions(REPO_ROOT, 'new')
+    current_remix_path = Path(find_ini_versions(REPO_ROOT, 'old')) / 'LIVE' / 'data' / 'Localization' / 'english' / 'global.ini'
+    new_stock_path = Path(version) / 'LIVE' / 'stock-global.ini'
+    output_path = Path(version) / 'LIVE' / 'data' / 'Localization' / 'english' / 'global.ini'
     output_dir = output_path.parent
-
-    print(f"Old Remix: {current_remix_path}")
+    
+    #we are currently in 4.5.0 so, should be the following
+    print(f"Old Remix: {current_remix_path}") 
     print(f"New Stock: {new_stock_path}")
     print(f"Output:    {output_path}")
 
@@ -74,8 +224,9 @@ def main():
     for key, stock_value in new_stock.items():
         if key == 'Frontend_PU_Version':
             # Special handling for version: use stock value + branding
-            new_remix[key] = f"{stock_value} - ScCompLangPackRemix"
+            new_remix[key] = f"{stock_value} - ca1usss version"
             new_entry_count += 1
+            version = stock_value.split('-')[0].strip()
         elif key in current_remix and key not in force_new_keys:
             # This key exists in the old remix, use the remixed value
             new_remix[key] = current_remix[key]
@@ -106,5 +257,10 @@ def main():
     if removed_keys:
         print(f"\nNote: {len(removed_keys)} entries from old remix not in new stock (removed from game)")
 
-if __name__ == '__main__':
+def main():
+    updateNewIni()
+    applyChanges()
+
+
+if __name__ == "__main__":
     main()
